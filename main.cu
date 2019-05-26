@@ -61,20 +61,20 @@ int main (int argc, char* argv[])
         printf("GPGPU: %s, CUDA %d.%d, %zd Mbytes global memory, %d CUDA cores\n",
         devProp.name, devProp.major, devProp.minor, devProp.totalGlobalMem / 1048576, cores);
 
-        cv::VideoCapture camera(0);
+        cv::VideoCapture camera(2);
         if(!camera.isOpened())
             return -1;
 
-        cv::namedWindow("Sobel Edge Detector");
-        int frameWidth = 1280;
-        int frameHeight = 720;
-        cv::resizeWindow("Sobel Edge Detector", frameWidth, frameHeight);
-        camera.set(cv::CAP_PROP_FRAME_WIDTH, frameWidth);
-        camera.set(cv::CAP_PROP_FRAME_HEIGHT, frameHeight);
+        cv::namedWindow("Sobel Edge Detector",cv::WINDOW_AUTOSIZE);
+        unsigned int width = 960;
+        unsigned int height = 540;
+        //cv::resizeWindow("Sobel Edge Detector", frameWidth, frameHeight);
+        camera.set(cv::CAP_PROP_FRAME_WIDTH, width);
+        camera.set(cv::CAP_PROP_FRAME_HEIGHT, height);
         cv::Mat* orig, *orig_gs, *edges;
-        unsigned int width, height = 0;
-        width = camera.get(cv::CAP_PROP_FRAME_WIDTH);
-        height = camera.get(cv::CAP_PROP_FRAME_HEIGHT);
+        //unsigned int width, height = 0;
+        //width = camera.get(cv::CAP_PROP_FRAME_WIDTH);
+        //height = camera.get(cv::CAP_PROP_FRAME_HEIGHT);
         
         orig = new cv::Mat(height,width,CV_8UC3);
         orig_gs = new cv::Mat(height,width,CV_8UC1);
