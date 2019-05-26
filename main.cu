@@ -10,7 +10,7 @@
 
 /*
 Compiling: Requires a Nvidia CUDA capable graphics card and the Nvidia GPU Computing Toolkit.
- *            Linux: nvcc main.cu -o test -Xcompiler -fopenmp `pkg-config --cflags --libs opencv`
+ *            Linux: nvcc -Wno-deprecated-gpu-targets -O3 -o test main.cu -Xcompiler -fopenmp `pkg-config --cflags --libs opencv`
  */
 
 #define GRIDVAL 16.0
@@ -65,55 +65,78 @@ int main (int argc, char* argv[])
         if(!camera.isOpened())
             return -1;
 
-        cv::namedWindow("Result");
-        cv::resizeWindow("Result", 640, 480);
-        camera.set(cv::CAP_PROP_FRAME_WIDTH, 640);
-        camera.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-        cv::Mat* orig, *orig_gs, *edges_cpu, *edges_omp, *edges_gpu;
+        cv::namedWindow("Sobel Edge Detector");
+        int frameWidth = 1280;
+        int frameHeight = 720;
+        cv::resizeWindow("Sobel Edge Detector", frameWidth, frameHeight);
+        camera.set(cv::CAP_PROP_FRAME_WIDTH, frameWidth);
+        camera.set(cv::CAP_PROP_FRAME_HEIGHT, frameHeight);
+        cv::Mat* orig, *orig_gs, *edges;
         unsigned int width, height = 0;
         width = camera.get(cv::CAP_PROP_FRAME_WIDTH);
         height = camera.get(cv::CAP_PROP_FRAME_HEIGHT);
         
         orig = new cv::Mat(height,width,CV_8UC3);
         orig_gs = new cv::Mat(height,width,CV_8UC1);
-        edges_cpu = new cv::Mat(height,width,CV_8UC1);
-        edges_omp = new cv::Mat(height,width,CV_8UC1);
-        edges_gpu = new cv::Mat(height,width,CV_8UC1);
+        edges = new cv::Mat(height,width,CV_8UC1);
         byte *gpu_orig, *gpu_sobel;
         cudaMalloc((void**)&gpu_orig,(width*height*sizeof(byte)));
         cudaMalloc((void**)&gpu_sobel,(width*height*sizeof(byte)));
         dim3 threadsPerBlock(GRIDVAL, GRIDVAL, 1);
         dim3 numBlocks(ceil(width/GRIDVAL), ceil(height/GRIDVAL), 1);
-        
+        uint8_t key = 99;
+        int8_t tmp = 0;
+        auto c = std::chrono::system_clock::now();
+        std::chrono::duration<double> time;
+
+        std::ostringstream buf;
 
         for(;;){
             camera >> *orig;
             cv::cvtColor(*orig, *orig_gs, CV_BGR2GRAY, 0);
-            auto c = std::chrono::system_clock::now();
-            sobel_cpu(orig_gs, edges_cpu , width, height);
-            std::chrono::duration<double> time_cpu = std::chrono::system_clock::now() - c;
-
-            c = std::chrono::system_clock::now();
-            sobel_omp(orig_gs, edges_omp , width, height);
-            std::chrono::duration<double> time_omp = std::chrono::system_clock::now() - c;
-            
-            c = std::chrono::system_clock::now();
-            cudaError_t error = cudaMemcpy(gpu_orig, orig_gs->data, (width*height*sizeof(byte)), cudaMemcpyHostToDevice);
-            cudaMemset(gpu_sobel, 0, (width*height*sizeof(byte)));
-            sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, width, height);
-            error = cudaDeviceSynchronize(); // waits for completion, returns error code
-            error = cudaMemcpy(edges_gpu->data, gpu_sobel, (width*height), cudaMemcpyDeviceToHost);
-            std::chrono::duration<double> time_gpu = std::chrono::system_clock::now() - c;
-            std::cout << "FPS CPU: " << (int)(1/time_cpu.count()) << "," << "\tFPS OMP: " << (int)(1/time_omp.count()) << "," << "\tFPS GPU: " << (int)(1/time_gpu.count()) << std::endl;
-
-            cv::imshow("Result", *edges_gpu);
-            if(cv::waitKey(10) == 27){
-                break;
+            tmp = cv::waitKey(1);
+            if(tmp != -1){
+                key = tmp;
             }
+            switch(key){
+                case 99:
+                    c = std::chrono::system_clock::now();
+                    sobel_cpu(orig_gs, edges, width, height);
+                    time = std::chrono::system_clock::now() - c;
+                    buf << "Mode: CPU" << "," << "  FPS: " << (int)(1/time.count());
+                    break;
+                case 111: 
+                    c = std::chrono::system_clock::now();
+                    sobel_omp(orig_gs, edges, width, height);
+                    time = std::chrono::system_clock::now() - c;
+                    buf << "Mode: OMP" << "," << "  FPS: " << (int)(1/time.count());
+                    break;
+                case 103:
+                    c = std::chrono::system_clock::now();
+                    cudaMemcpy(gpu_orig, orig_gs->data, (width*height*sizeof(byte)), cudaMemcpyHostToDevice);
+                    cudaMemset(gpu_sobel, 0, (width*height*sizeof(byte)));
+                    sobel_gpu<<<numBlocks, threadsPerBlock>>>(gpu_orig, gpu_sobel, width, height);
+                    cudaDeviceSynchronize(); // waits for completion, returns error code
+                    cudaMemcpy(edges->data, gpu_sobel, (width*height), cudaMemcpyDeviceToHost);
+                    time = std::chrono::system_clock::now() - c;
+                    buf << "Mode: GPU" << "," << "  FPS: " << (int)(1/time.count());
+                    break;
+                case 27: 
+                    free(orig); free(orig_gs); free(edges);
+                    cudaFree(gpu_orig); cudaFree(gpu_sobel);
+                    return 0;
+                default: 
+                    std::cout << "Choice not available... Falling back to CPU MODE" << std::endl;
+                    key = 99;
+                    break;
+            }
+            putText(*edges, buf.str(), cv::Point(10, 30), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
+            cv::imshow("Sobel Edge Detector", *edges);
+            buf.str("");
+            buf.clear();
+            //std::cout << "FPS: " << (int)(1/time.count()) << std::endl;
+            
         }
-        free(orig); free(orig_gs); free(edges_cpu); free(edges_omp);
-        cudaFree(gpu_orig);
-        cudaFree(gpu_sobel);
 
     }
     catch(const cv::Exception& ex)
