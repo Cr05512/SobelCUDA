@@ -55,7 +55,7 @@ int main (int argc, char* argv[])
         time_t rawTime;time(&rawTime);
         struct tm* curTime = localtime(&rawTime);
         char timeBuffer[80] = "";
-        strftime(timeBuffer, 80, "edge map benchmarks (%c)\n", curTime);
+        strftime(timeBuffer, 80, "Sobel Edge Detector Benchamrks (%c)\n", curTime);
         printf("%s", timeBuffer);
         printf("CPU: %d hardware threads\n", std::thread::hardware_concurrency());
         printf("GPGPU: %s, CUDA %d.%d, %zd Mbytes global memory, %d CUDA cores\n",
