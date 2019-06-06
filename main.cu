@@ -21,7 +21,7 @@ typedef unsigned char byte;
 
 void sobel_cpu(const cv::Mat* orig_gs, cv::Mat* edges_cpu, const unsigned int width, const unsigned int height);
 void sobel_omp(const cv::Mat* orig_gs, cv::Mat* edges_omp, const unsigned int width, const unsigned int height);
-uint16_t avg(uint16_t* fpsMeanVec);
+int avg(int* fpsMeanVec);
 
 __global__ void sobel_gpu(const byte* orig, byte* gpu, const unsigned int width, const unsigned int height) {
     int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -78,16 +78,17 @@ int main (int argc, char* argv[])
         cv::namedWindow("Sobel Edge Detector",cv::WINDOW_AUTOSIZE);
         unsigned int width = 640;
         unsigned int height = 480;
-        unsigned int framerate = 120;
-        unsigned int flip_method = 0;
-        std::string pipeline = gstreamer_pipeline(width,
-            height,
-            width,
-            height,
-            framerate,
-            flip_method);
+        // unsigned int framerate = 120;
+        // unsigned int flip_method = 0;
+        // std::string pipeline = gstreamer_pipeline(width,
+        //     height,
+        //     width,
+        //     height,
+        //     framerate,
+        //     flip_method);
         
-        cv::VideoCapture camera(pipeline, cv::CAP_GSTREAMER);
+        //cv::VideoCapture camera(pipeline, cv::CAP_GSTREAMER);
+        cv::VideoCapture camera(0);
         if(!camera.isOpened())
             return -1;
         //cv::resizeWindow("Sobel Edge Detector", frameWidth, frameHeight);
@@ -115,8 +116,8 @@ int main (int argc, char* argv[])
         std::chrono::duration<double> time;
 
         std::ostringstream buf;
-        uint16_t* fpsMeanVec = new uint16_t[meanLength];
-        memset(fpsMeanVec,0,meanLength*sizeof(uint16_t));
+        int* fpsMeanVec = new int[meanLength];
+        memset(fpsMeanVec,0,meanLength*sizeof(int));
         uint8_t counter = 0;
 
         for(;;){
@@ -225,11 +226,11 @@ void sobel_omp(const cv::Mat* orig_gs, cv::Mat* edges_omp, const unsigned int wi
     }
 }
 
-uint16_t avg(uint16_t* fpsMeanVec){
-    uint16_t sum = 0;
+int avg(int* fpsMeanVec){
+    int sum = 0;
     for(int i=0; i<meanLength; i++)
     {
         sum = sum + fpsMeanVec[i];
     }
-    return (uint16_t)sum/meanLength;
+    return (int)sum/meanLength;
 }
