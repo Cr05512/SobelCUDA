@@ -22,6 +22,7 @@ After launching the program you should be able to see the RGB output.
 - Press `C` for CPU mode
 - Press `O` for OMP mode
 - Press `G` for GPU mode
+- Press `ESC` to terminate the execution
 
 ## Note
 The FPS are "theoretic", this is note a valid tool for precise benchmarking. The computation of performances relies only on  
