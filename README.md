@@ -28,3 +28,5 @@ After launching the program you should be able to see the RGB output.
 The FPS are "theoretic", this is note a valid tool for precise benchmarking. The computation of performances relies only on  
 the processing time (for the GPU mode even the MemCopy phase is considered). This program is not meant to prove anything,  
 but just to give a vague idea of the speedup provided by parallelization.
+
+<img src="Example.jpg" width="700" height="400" />
