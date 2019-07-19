@@ -1,10 +1,9 @@
 ################ MAKEFILE TEMPLATE ################
 
-# Author : Lucas Carpenter
+# Author : Alessandro D'Ortenzio
 
 # Usage : make target1
 
-# What compiler are we using? (gcc, g++, nvcc, etc)
 LINK = nvcc
 
 # Name of our binary executable
