@@ -29,4 +29,4 @@ The FPS are "theoretic", this is note a valid tool for precise benchmarking. The
 the processing time (for the GPU mode even the MemCopy phase is considered). This program is not meant to prove anything,  
 but just to give a vague idea of the speedup provided by parallelization.
 
-<img src="Example.jpg" width="700" height="400" />
+<img src="Example.jpg" width="640" height="511" />
