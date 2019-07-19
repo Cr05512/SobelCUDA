@@ -169,7 +169,7 @@ int main (int argc, char* argv[])
                     buf.clear();
                     break;
                 case 27:
-                    free(orig); free(orig_gs); free(edges);
+                    delete orig; delete orig_gs; delete edges;
                     cudaFree(gpu_orig); cudaFree(gpu_sobel);
                     camera.release();
                     cv::destroyAllWindows();
