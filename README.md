@@ -5,8 +5,7 @@ it was meant as "benchmark" for the Nvidia Jetson nano board, but the program is
 pipeline uses gstreamer and OpenCV and, of course, the nvidia cuda toolkit; be sure to have those dependencies installed.  
 
 ## Dependencies
-* make
-* OpenCV >= 3.4 (at least the program was written with this version. It might work even with older releases)
+* OpenCV >= 3.4 (it might work even with older releases, 3.0+)
 * gcc/g++
 * Nvidia CUDA Toolkit (v10.1 was used here)
 
