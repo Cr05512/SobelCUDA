@@ -76,19 +76,19 @@ int main (int argc, char* argv[])
         
 
         cv::namedWindow("Sobel Edge Detector",cv::WINDOW_AUTOSIZE);
-        unsigned int width = 640;
-        unsigned int height = 480;
-        // unsigned int framerate = 120;
-        // unsigned int flip_method = 0;
-        // std::string pipeline = gstreamer_pipeline(width,
-        //     height,
-        //     width,
-        //     height,
-        //     framerate,
-        //     flip_method);
+        unsigned int width = 800;
+        unsigned int height = 600;
+        unsigned int framerate = 120;
+        unsigned int flip_method = 0;
+        std::string pipeline = gstreamer_pipeline(width,
+            height,
+            width,
+            height,
+            framerate,
+            flip_method);
         
-        //cv::VideoCapture camera(pipeline, cv::CAP_GSTREAMER);
-        cv::VideoCapture camera(0);
+        cv::VideoCapture camera(pipeline, cv::CAP_GSTREAMER);  //uncomment this for raspberry pi camera
+        //cv::VideoCapture camera(0);
         if(!camera.isOpened())
             return -1;
         //cv::resizeWindow("Sobel Edge Detector", frameWidth, frameHeight);
